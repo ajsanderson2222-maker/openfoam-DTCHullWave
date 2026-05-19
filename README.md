@@ -84,6 +84,13 @@ The solution settles by t ≈ 2–3 s. After that, small oscillations remain due
 **Solver residuals for p_rgh, α_water, and Ux:**
 ![Convergence](convergence.png)
 
+### Wave Pattern Evolution
+
+**Free-surface elevation (top-down view) from t = 1–6 s:**
+![Wave animation](wave_animation.gif)
+
+The bow wave builds during the first ~2 s as the flow establishes; by t ≈ 3 s the Kelvin wake is stationary. The characteristic diverging and transverse wave system is visible aft of the hull.
+
 ### Wave Pattern — Symmetry Plane (y = 0)
 
 **Water volume fraction and pressure at t = 5 s (zoomed around hull):**
