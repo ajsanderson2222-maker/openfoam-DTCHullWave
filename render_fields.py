@@ -92,7 +92,7 @@ vp.ViewSize            = [1400, 500]
 vp.CameraPosition      = [ 3.0, -10.0, 0.28]
 vp.CameraFocalPoint    = [ 3.0,   0.0, 0.28]
 vp.CameraViewUp        = [0, 0, 1]
-vp.CameraParallelScale = 0.85
+vp.CameraParallelScale = 1.5
 
 side_txt = Text(); side_txt.Text = 'SIDE VIEW  (port)'
 sDsp = Show(side_txt); sDsp.FontSize = 20; sDsp.Bold = 1
