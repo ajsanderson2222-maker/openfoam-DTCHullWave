@@ -84,9 +84,22 @@ The solution settles by t ≈ 2–3 s. After that, small oscillations remain due
 **Solver residuals for p_rgh, α_water, and Ux:**
 ![Convergence](convergence.png)
 
-### Free-Surface Wave Pattern
+### Wave Pattern — Symmetry Plane (y = 0)
 
-The free-surface interface at t = 5 s is stored as a VTK surface in `postProcessing/surfaces/5/interface.vtk`. Visualise in ParaView — colour by z (elevation) to see the Kelvin wave pattern and bow/stern waves.
+**Water volume fraction and pressure at t = 5 s (zoomed around hull):**
+![Wave pattern](wave_pattern.png)
+
+**Full-domain wave pattern:**
+![Wave pattern full](wave_pattern_full.png)
+
+The free surface (α = 0.5 contour, black line) shows the characteristic bow wave building up ahead of the hull and the Kelvin wake developing downstream. The pressure field reflects the high-pressure stagnation zone at the bow and the low-pressure trough along the hull waterline.
+
+### Hull Surface Pressure
+
+**Pressure distribution on the hull surface (side view, t = 5 s):**
+![Hull pressure](hull_pressure.png)
+
+High pressure at the bow stagnation point drives the wave-making resistance; the negative pressure region along the midbody and stern contributes to form drag.
 
 ---
 
