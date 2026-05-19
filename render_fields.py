@@ -72,6 +72,14 @@ cb_z.Orientation = 'Horizontal'
 cb_z.WindowLocation = 'Lower Center'
 cb_z.Visibility = 1
 
+# Load hull once — kept visible in every frame as a solid grey surface
+hull    = LegacyVTKReader(FileNames=[f'{VTK_DIR}/hull/hull_2518.vtk'])
+hullDsp = Show(hull)
+hullDsp.AmbientColor  = [0.3, 0.3, 0.3]
+hullDsp.DiffuseColor  = [0.3, 0.3, 0.3]
+hullDsp.Opacity       = 1.0
+hullDsp.ColorArrayName = ['POINTS', '']   # solid colour, no scalar
+
 frames = []
 for t in gif_times:
     src  = LegacyVTKReader(FileNames=[f'{SURF}/{t}/interface.vtk'])
@@ -82,11 +90,9 @@ for t in gif_times:
 
     dsp = Show(calc)
     ColorBy(dsp, ('POINTS', 'z_elevation'))
-    # Apply the shared LUT (don't let ParaView auto-rescale)
     dsp.LookupTable = lut_z
     cb_z.Visibility = 1
 
-    # Time label
     txt = Text()
     txt.Text = f't = {t} s'
     tDsp = Show(txt)
