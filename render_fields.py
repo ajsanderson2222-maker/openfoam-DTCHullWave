@@ -42,6 +42,7 @@ v = GetRenderView()
 apply_camera(v)
 Render()
 save(f'{CASE}/wave_pattern_midplane.png')
+cb_a.Visibility = 0   # hide alpha colorbar before GIF frames
 Delete(mid); del mid
 
 # ── 2. GIF: interface side view t = 1–6 s ─────────────────────────────────────
