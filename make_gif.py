@@ -4,6 +4,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
+from matplotlib.tri import TriAnalyzer
 import matplotlib.cm as cm
 import vtk, os
 from PIL import Image
@@ -70,6 +71,8 @@ for t, pts, tris, p in frames_data:
 
     # Top-down view: x (bow→stern) vs y (spanwise), coloured by wave elevation z
     triang = tri.Triangulation(x, y, tris)
+    mask = TriAnalyzer(triang).get_flat_tri_mask(min_circle_ratio=0.01)
+    triang.set_mask(mask)
     im = ax.tricontourf(triang, z, levels=50, cmap='RdBu_r',
                         vmin=np.percentile(z, 2), vmax=np.percentile(z, 98))
     plt.colorbar(im, ax=ax, label='Free-surface elevation z [m]', shrink=0.85)

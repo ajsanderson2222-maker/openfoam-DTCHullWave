@@ -4,6 +4,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
+from matplotlib.tri import TriAnalyzer
 import vtk
 import os
 
@@ -29,6 +30,12 @@ def get_point_array(d, name):
         return None
     return np.array([arr.GetValue(i) for i in range(arr.GetNumberOfTuples())])
 
+def clean_triang(triang):
+    """Mask degenerate (near-flat) triangles that cause white spots."""
+    mask = TriAnalyzer(triang).get_flat_tri_mask(min_circle_ratio=0.01)
+    triang.set_mask(mask)
+    return triang
+
 def get_connectivity(d):
     """Return (ntri, 3) int array of triangulated cell connectivity."""
     tris = []
@@ -52,7 +59,7 @@ alpha_m = get_point_array(mid, 'alpha.water')
 p_m     = get_point_array(mid, 'p')
 tris_m  = get_connectivity(mid)
 
-triang_m = tri.Triangulation(x_m, z_m, tris_m)
+triang_m = clean_triang(tri.Triangulation(x_m, z_m, tris_m))
 
 fig, axes = plt.subplots(2, 1, figsize=(14, 8))
 fig.suptitle('DTC Hull — symmetry plane (y = 0) at t = 5 s', fontsize=13)
@@ -115,7 +122,7 @@ p_h = get_point_array(hull, 'p')
 tris_h = get_connectivity(hull)
 
 # Side view: project onto x-z plane (port side, y < 0 dominant)
-triang_h = tri.Triangulation(x_h, z_h, tris_h)
+triang_h = clean_triang(tri.Triangulation(x_h, z_h, tris_h))
 
 fig, ax = plt.subplots(figsize=(12, 4))
 im = ax.tricontourf(triang_h, p_h, levels=60, cmap='coolwarm')
