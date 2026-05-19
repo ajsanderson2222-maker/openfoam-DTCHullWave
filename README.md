@@ -91,6 +91,13 @@ The solution settles by t ≈ 2–3 s. After that, small oscillations remain due
 
 The bow wave builds during the first ~2 s; by t ≈ 3 s the wave pattern is stationary. The wave crests and troughs along the hull are visible as high- and low-pressure zones on the free surface.
 
+### Hull Surface Pressure
+
+**Pressure distribution on the hull (isometric view, t = 5 s):**
+![Hull pressure](hull_pressure.png)
+
+High pressure at the bow stagnation point drives wave-making resistance; low pressure along the midbody and stern contributes to form drag. The viscous component (61% of total) dominates at Fr = 0.223.
+
 ### Wave Pattern — Symmetry Plane (y = 0)
 
 **Water volume fraction α on the centreline x–z plane at t = 5 s:**

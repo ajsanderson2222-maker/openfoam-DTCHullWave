@@ -73,6 +73,39 @@ cb_z.Orientation = 'Horizontal'
 cb_z.WindowLocation = 'Lower Center'
 cb_z.Visibility = 1
 
+# ── 2. Hull surface pressure contours ────────────────────────────────────────
+hull_p    = LegacyVTKReader(FileNames=[f'{VTK_DIR}/hull/hull_2518.vtk'])
+hullpDsp  = Show(hull_p)
+ColorBy(hullpDsp, ('POINTS', 'p'))
+
+lut_p = GetColorTransferFunction('p')
+lut_p.ApplyPreset('Cool to Warm', True)
+lut_p.RescaleTransferFunction(0, 2500)
+
+cb_p = GetScalarBar(lut_p, GetRenderView())
+cb_p.Title = 'Pressure [Pa]'
+cb_p.ComponentTitle = ''
+cb_p.Orientation = 'Horizontal'
+cb_p.WindowLocation = 'Lower Center'
+cb_p.Visibility = 1
+
+# Isometric view: equal foreshortening from above-port-bow
+# Hull centre ~(3.0, -0.2, 0.28); pull camera along (−1,−1,1) diagonal
+vp = GetRenderView()
+vp.ViewSize                  = [1400, 600]
+vp.Background                = [1, 1, 1]
+vp.OrientationAxesVisibility = 0
+vp.CameraParallelProjection  = 1   # true iso (no perspective distortion)
+vp.CameraPosition            = [-2.0, -3.5, 2.5]
+vp.CameraFocalPoint          = [ 3.0, -0.2, 0.28]
+vp.CameraViewUp              = [0, 0, 1]
+vp.CameraParallelScale       = 1.0
+Render()
+save(f'{CASE}/hull_pressure.png')
+
+cb_p.Visibility = 0
+Delete(hull_p); del hull_p
+
 # Load hull once — kept visible in every frame as a solid grey surface
 hull    = LegacyVTKReader(FileNames=[f'{VTK_DIR}/hull/hull_2518.vtk'])
 hullDsp = Show(hull)
