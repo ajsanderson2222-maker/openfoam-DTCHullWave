@@ -116,7 +116,7 @@ Hide(side_txt); Delete(side_txt)
 
 # Bow-on view: mirror hull across y=0 to show full ship width
 hull_mirror  = Reflect(Input=hull_p)
-hull_mirror.Plane = 'Y Min'   # reflect across y=0 plane
+hull_mirror.Plane = 'Y Max'   # reflect across y=0 (symmetry plane)
 hull_mirror.UpdatePipeline()
 mirrorDsp = Show(hull_mirror)
 ColorBy(mirrorDsp, ('POINTS', 'p'))
