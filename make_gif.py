@@ -4,7 +4,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
-from matplotlib.tri import TriAnalyzer
+from scipy.spatial import Delaunay
 import matplotlib.cm as cm
 import vtk, os
 from PIL import Image
@@ -62,7 +62,7 @@ hull_x = hull_pts[:, 0]
 hull_y = hull_pts[:, 1]
 
 frames = []
-for t, pts, tris, p in frames_data:
+for sim_t, pts, tris, p in frames_data:
     x = pts[:, 0]
     y = pts[:, 1]   # spanwise (0 at symmetry, positive to starboard)
     z = pts[:, 2]   # vertical
@@ -70,9 +70,13 @@ for t, pts, tris, p in frames_data:
     fig, ax = plt.subplots(figsize=(13, 5.5))
 
     # Top-down view: x (bow→stern) vs y (spanwise), coloured by wave elevation z
-    triang = tri.Triangulation(x, y, tris)
-    mask = TriAnalyzer(triang).get_flat_tri_mask(min_circle_ratio=0.01)
-    triang.set_mask(mask)
+    d2 = Delaunay(np.column_stack([x, y]))
+    triang = tri.Triangulation(x, y, d2.simplices)
+    tt = d2.simplices
+    ax2, ay2 = x[tt[:,1]]-x[tt[:,0]], y[tt[:,1]]-y[tt[:,0]]
+    bx2, by2 = x[tt[:,2]]-x[tt[:,0]], y[tt[:,2]]-y[tt[:,0]]
+    areas = 0.5 * np.abs(ax2*by2 - ay2*bx2)
+    triang.set_mask(areas > 3.0 * np.median(areas))
     im = ax.tricontourf(triang, z, levels=50, cmap='RdBu_r',
                         vmin=np.percentile(z, 2), vmax=np.percentile(z, 98))
     plt.colorbar(im, ax=ax, label='Free-surface elevation z [m]', shrink=0.85)
@@ -84,7 +88,7 @@ for t, pts, tris, p in frames_data:
     ax.set_ylim(-2, 0.1)
     ax.set_xlabel('x [m]  (0 = bow,  positive → stern)')
     ax.set_ylabel('y [m]  (0 = centreline)')
-    ax.set_title(f'DTC Hull — free-surface wave pattern  |  t = {t} s  '
+    ax.set_title(f'DTC Hull — free-surface wave pattern  |  t = {sim_t} s  '
                  f'(U = 1.668 m/s, Fr = 0.223)')
     ax.set_aspect('equal')
     ax.invert_yaxis()   # port on top (conventional ship view)
@@ -98,7 +102,7 @@ for t, pts, tris, p in frames_data:
     buf = buf.reshape(fig.canvas.get_width_height()[::-1] + (4,))[:, :, :3]
     frames.append(Image.fromarray(buf))
     plt.close()
-    print(f'  frame t={t}s done')
+    print(f'  frame t={sim_t}s done')
 
 out = f'{CASE}/wave_animation.gif'
 frames[0].save(out, save_all=True, append_images=frames[1:],

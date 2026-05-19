@@ -30,10 +30,25 @@ def get_point_array(d, name):
         return None
     return np.array([arr.GetValue(i) for i in range(arr.GetNumberOfTuples())])
 
-def clean_triang(triang):
-    """Mask degenerate (near-flat) triangles that cause white spots."""
-    mask = TriAnalyzer(triang).get_flat_tri_mask(min_circle_ratio=0.01)
-    triang.set_mask(mask)
+def make_triang(x, y, max_area_ratio=3.0):
+    """Build a clean 2-D Delaunay triangulation and mask oversized triangles.
+
+    Using scipy Delaunay on the projected 2-D points avoids the artefacts
+    from VTK 3-D connectivity projected onto a plane (long-range spurious
+    triangles that create white holes everywhere).  Oversized triangles that
+    fill concave gaps are then masked by area threshold.
+    """
+    from scipy.spatial import Delaunay
+    pts2d = np.column_stack([x, y])
+    d = Delaunay(pts2d)
+    triang = tri.Triangulation(x, y, d.simplices)
+    # mask triangles much larger than the median (concave-hull gap-fillers)
+    t = d.simplices
+    ax, ay = x[t[:,1]]-x[t[:,0]], y[t[:,1]]-y[t[:,0]]
+    bx, by = x[t[:,2]]-x[t[:,0]], y[t[:,2]]-y[t[:,0]]
+    areas = 0.5 * np.abs(ax*by - ay*bx)
+    threshold = max_area_ratio * np.median(areas)
+    triang.set_mask(areas > threshold)
     return triang
 
 def get_connectivity(d):
@@ -59,7 +74,7 @@ alpha_m = get_point_array(mid, 'alpha.water')
 p_m     = get_point_array(mid, 'p')
 tris_m  = get_connectivity(mid)
 
-triang_m = clean_triang(tri.Triangulation(x_m, z_m, tris_m))
+triang_m = make_triang(x_m, z_m)
 
 fig, axes = plt.subplots(2, 1, figsize=(14, 8))
 fig.suptitle('DTC Hull — symmetry plane (y = 0) at t = 5 s', fontsize=13)
@@ -122,7 +137,7 @@ p_h = get_point_array(hull, 'p')
 tris_h = get_connectivity(hull)
 
 # Side view: project onto x-z plane (port side, y < 0 dominant)
-triang_h = clean_triang(tri.Triangulation(x_h, z_h, tris_h))
+triang_h = make_triang(x_h, z_h)
 
 fig, ax = plt.subplots(figsize=(12, 4))
 im = ax.tricontourf(triang_h, p_h, levels=60, cmap='coolwarm')
