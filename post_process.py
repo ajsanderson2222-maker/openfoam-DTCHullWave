@@ -42,10 +42,11 @@ Fx_pres    = np.array(Fx_pres);  Fx_visc = np.array(Fx_visc)
 Fz_pres    = np.array(Fz_pres);  Fz_visc = np.array(Fz_visc)
 My_pres    = np.array(My_pres);  My_visc = np.array(My_visc)
 
-resistance = -(Fx_pres + Fx_visc)          # positive = drag
-Rp = -Fx_pres;  Rv = -Fx_visc
-Fz = Fz_pres + Fz_visc                     # net vertical (heave) force
-My = My_pres + My_visc                     # net pitch moment
+# Simulation is half-domain (symmetry at y=0) — multiply all loads by 2
+resistance = 2 * -(Fx_pres + Fx_visc)     # positive = drag, full ship
+Rp = 2 * -Fx_pres;  Rv = 2 * -Fx_visc
+Fz = 2 * (Fz_pres + Fz_visc)              # net vertical force, full ship
+My = 2 * (My_pres + My_visc)              # net pitch moment, full ship
 
 mask      = times > 0.1
 mask_mean = times > 4.0

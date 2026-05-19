@@ -71,11 +71,11 @@ The hull heaves freely in z and pitches about y at each time step. The `rigidBod
 
 | Quantity | Value |
 |---|---|
-| Mean total resistance (t > 4 s) | **22.0 N** |
-| Pressure (wave-making) component | 8.5 N (39%) |
-| Viscous (friction) component | 13.5 N (61%) |
+| Mean total resistance (t > 4 s) | **43.9 N** |
+| Pressure (wave-making) component | 17.0 N (39%) |
+| Viscous (friction) component | 27.0 N (61%) |
 
-The solution settles by t ≈ 2–3 s. Residual oscillations after that are driven by the periodic Stokes wave field exciting heave and pitch. The viscous component dominates at Fr = 0.223 — the hull is running well below its hull speed, so wave-making resistance is modest and skin friction is the primary contributor.
+The solution settles by t ≈ 2–3 s. Residual oscillations after that are driven by the periodic Stokes wave field exciting heave and pitch. The simulation uses a half-domain (symmetry at y = 0), so forces on the half-hull patch are doubled to give full-ship loads. The viscous component dominates at Fr = 0.223 — the hull is running well below its hull speed, so wave-making resistance is modest and skin friction is the primary contributor.
 
 ### Ship Loads vs Time
 
