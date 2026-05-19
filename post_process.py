@@ -45,11 +45,16 @@ My_pres    = np.array(My_pres);  My_visc = np.array(My_visc)
 # Simulation is half-domain (symmetry at y=0) — multiply all loads by 2
 resistance = 2 * -(Fx_pres + Fx_visc)     # positive = drag, full ship
 Rp = 2 * -Fx_pres;  Rv = 2 * -Fx_visc
-Fz = 2 * (Fz_pres + Fz_visc)              # net vertical force, full ship
+Fz_total = 2 * (Fz_pres + Fz_visc)        # full ship (includes static buoyancy)
 My = 2 * (My_pres + My_visc)              # net pitch moment, full ship
+
+# Subtract hydrostatic equilibrium so Fz shows only the dynamic sinkage force
+# Use mean over settled period; mask_mean defined below with resistance stats
+Fz = Fz_total   # re-centred below once mask_mean is defined
 
 mask      = times > 0.1
 mask_mean = times > 4.0
+Fz = Fz_total - (Fz_total[mask_mean].mean() if mask_mean.any() else Fz_total[0])
 R_mean  = resistance[mask_mean].mean() if mask_mean.any() else float('nan')
 Rp_mean = Rp[mask_mean].mean()         if mask_mean.any() else float('nan')
 Rv_mean = Rv[mask_mean].mean()         if mask_mean.any() else float('nan')
@@ -93,7 +98,7 @@ Fz_plot = Fz[mask]
 ax.plot(times[mask], Fz_plot, 'g-', lw=1.2, label='Net vertical force Fz')
 ax.axhline(Fz[mask_mean].mean(), color='g', lw=1, ls='-.', alpha=0.5,
            label=f'Mean {Fz[mask_mean].mean():.1f} N')
-ax.set_ylabel('Vertical force Fz [N]')
+ax.set_ylabel('Dynamic vertical force ΔFz [N]\n(buoyancy subtracted)')
 ax.legend(fontsize=8, ncol=2)
 ax.grid(alpha=0.3)
 

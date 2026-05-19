@@ -82,7 +82,7 @@ The solution settles by t ≈ 2–3 s. Residual oscillations after that are driv
 **Resistance (Fx), vertical force (Fz), and pitch moment (My) vs time:**
 ![Ship loads](ship_loads.png)
 
-All three loads settle by t ≈ 2–3 s. The vertical force Fz reflects the net hydrodynamic sinkage force as the hull trims to its dynamic running attitude; the pitch moment My shows the bow-down trimming moment driven by the high bow stagnation pressure. Oscillations after settling are the periodic wave excitation from the Stokes incident wave field.
+All loads settle by t ≈ 2–3 s. Fz is the **dynamic** vertical force (static buoyancy subtracted) — the small residual reflects the additional sinkage as the hull accelerates to its running trim. My shows the bow-down pitching moment driven by the high bow stagnation pressure. Oscillations after settling are periodic excitation from the Stokes incident wave field.
 
 ### Convergence
 
