@@ -7,12 +7,14 @@ CASE    = os.path.dirname(os.path.abspath(__file__))
 VTK_DIR = f'{CASE}/VTK'
 SURF    = f'{CASE}/postProcessing/surfaces'
 
+ALL_LUTS = []   # track every LUT created so we can hide all bars reliably
+
 def hide_all_colorbars():
-    """Hide every scalar bar in the active view before rendering."""
+    """Hide scalar bars for every LUT created in this session."""
     v = GetRenderView()
-    for rep in GetRepresentations():
+    for lut in ALL_LUTS:
         try:
-            rep.SetScalarBarVisibility(v, False)
+            GetScalarBar(lut, v).Visibility = 0
         except Exception:
             pass
 
@@ -28,6 +30,7 @@ ColorBy(midDsp, ('POINTS', 'alpha.water'))
 lut_a = GetColorTransferFunction('alpha.water')
 lut_a.ApplyPreset('Cool to Warm', True)
 lut_a.RescaleTransferFunction(0.0, 1.0)
+ALL_LUTS.append(lut_a)
 
 cb_a = GetScalarBar(lut_a, GetRenderView())
 cb_a.Title = 'alpha.water'
@@ -59,6 +62,7 @@ ColorBy(hullpDsp, ('POINTS', 'p'))
 lut_p = GetColorTransferFunction('p')
 lut_p.ApplyPreset('Cool to Warm', True)
 lut_p.RescaleTransferFunction(0, 2500)
+ALL_LUTS.append(lut_p)
 
 cb_p = GetScalarBar(lut_p, GetRenderView())
 cb_p.Title = 'Pressure [Pa]'
@@ -66,20 +70,33 @@ cb_p.ComponentTitle = ''
 cb_p.Orientation = 'Horizontal'
 cb_p.WindowLocation = 'Lower Center'
 
+# Isometric from bow (x≈6.16) — camera in +x, -y, +z direction
+# Hull centre ≈ (3.0, -0.2, 0.28); bow at x≈6.16, stern at x≈0
 vp = GetRenderView()
-vp.ViewSize                  = [1400, 600]
+vp.ViewSize                  = [1400, 700]
 vp.Background                = [1, 1, 1]
 vp.OrientationAxesVisibility = 0
 vp.CameraParallelProjection  = 1
-vp.CameraPosition            = [-2.0, -3.5, 2.5]
+vp.CameraPosition            = [10.0, -4.0, 3.5]
 vp.CameraFocalPoint          = [ 3.0, -0.2, 0.28]
 vp.CameraViewUp              = [0, 0, 1]
-vp.CameraParallelScale       = 1.0
+vp.CameraParallelScale       = 1.4   # zoomed out to show full hull
+
+# BOW label
+bow_txt = Text()
+bow_txt.Text = 'BOW →'
+bowDsp = Show(bow_txt)
+bowDsp.FontSize       = 22
+bowDsp.Bold           = 1
+bowDsp.Color          = [0, 0, 0]
+bowDsp.WindowLocation = 'Upper Right Corner'
 
 hide_all_colorbars()
 cb_p.Visibility = 1
 Render()
-save(f'{CASE}/hull_pressure.png', 1400, 600)
+save(f'{CASE}/hull_pressure.png', 1400, 700)
+
+Hide(bow_txt); Delete(bow_txt)
 Delete(hull_p); del hull_p
 
 # ── 3. GIF: interface side view t = 1–6 ──────────────────────────────────────
@@ -98,6 +115,7 @@ for t in gif_times:
 lut_z = GetColorTransferFunction('z_elevation')
 lut_z.ApplyPreset('Cool to Warm', True)
 lut_z.RescaleTransferFunction(z_lo, z_hi)
+ALL_LUTS.append(lut_z)
 
 cb_z = GetScalarBar(lut_z, GetRenderView())
 cb_z.Title = 'Free surface elevation [m]'
