@@ -94,9 +94,43 @@ bowDsp.WindowLocation = 'Upper Right Corner'
 hide_all_colorbars()
 cb_p.Visibility = 1
 Render()
-save(f'{CASE}/hull_pressure.png', 1400, 700)
-
+save(f'{CASE}/hull_pressure_iso.png', 1400, 700)
 Hide(bow_txt); Delete(bow_txt)
+
+# Side view: looking along +y (port side), x horizontal, z vertical
+vp.ViewSize           = [1400, 500]
+vp.CameraPosition     = [ 3.0, -10.0, 0.28]
+vp.CameraFocalPoint   = [ 3.0,   0.0, 0.28]
+vp.CameraViewUp       = [0, 0, 1]
+vp.CameraParallelScale = 0.40
+
+side_txt = Text(); side_txt.Text = 'SIDE VIEW  (port)'
+sDsp = Show(side_txt); sDsp.FontSize = 20; sDsp.Bold = 1
+sDsp.Color = [0,0,0]; sDsp.WindowLocation = 'Upper Left Corner'
+
+hide_all_colorbars()
+cb_p.Visibility = 1
+Render()
+save(f'{CASE}/hull_pressure_side.png', 1400, 500)
+Hide(side_txt); Delete(side_txt)
+
+# Bow-on view: looking from +x toward stern, y horizontal, z vertical
+vp.ViewSize            = [700, 700]
+vp.CameraPosition      = [10.0, -0.2, 0.28]
+vp.CameraFocalPoint    = [ 3.0, -0.2, 0.28]
+vp.CameraViewUp        = [0, 0, 1]
+vp.CameraParallelScale = 0.40
+
+bow2_txt = Text(); bow2_txt.Text = 'BOW-ON VIEW'
+b2Dsp = Show(bow2_txt); b2Dsp.FontSize = 20; b2Dsp.Bold = 1
+b2Dsp.Color = [0,0,0]; b2Dsp.WindowLocation = 'Upper Left Corner'
+
+hide_all_colorbars()
+cb_p.Visibility = 1
+Render()
+save(f'{CASE}/hull_pressure_bow.png', 700, 700)
+Hide(bow2_txt); Delete(bow2_txt)
+
 Delete(hull_p); del hull_p
 
 # ── 3. GIF: interface side view t = 1–6 ──────────────────────────────────────

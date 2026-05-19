@@ -93,8 +93,14 @@ The bow wave builds during the first ~2 s; by t ≈ 3 s the wave pattern is stat
 
 ### Hull Surface Pressure
 
-**Pressure distribution on the hull (isometric view, t = 5 s):**
-![Hull pressure](hull_pressure.png)
+**Isometric view from bow:**
+![Hull pressure iso](hull_pressure_iso.png)
+
+**Port side view:**
+![Hull pressure side](hull_pressure_side.png)
+
+**Bow-on view:**
+![Hull pressure bow](hull_pressure_bow.png)
 
 High pressure at the bow stagnation point drives wave-making resistance; low pressure along the midbody and stern contributes to form drag. The viscous component (61% of total) dominates at Fr = 0.223.
 
