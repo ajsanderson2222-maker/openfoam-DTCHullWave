@@ -82,27 +82,17 @@ vp.CameraFocalPoint          = [ 3.0, -0.2, 0.28]
 vp.CameraViewUp              = [0, 0, 1]
 vp.CameraParallelScale       = 1.4   # zoomed out to show full hull
 
-# BOW label
-bow_txt = Text()
-bow_txt.Text = 'BOW →'
-bowDsp = Show(bow_txt)
-bowDsp.FontSize       = 22
-bowDsp.Bold           = 1
-bowDsp.Color          = [0, 0, 0]
-bowDsp.WindowLocation = 'Upper Right Corner'
-
 hide_all_colorbars()
 cb_p.Visibility = 1
 Render()
 save(f'{CASE}/hull_pressure_iso.png', 1400, 700)
-Hide(bow_txt); Delete(bow_txt)
 
 # Side view: zoomed out to show full hull length
 vp.ViewSize            = [1400, 500]
 vp.CameraPosition      = [ 3.0, -10.0, 0.28]
 vp.CameraFocalPoint    = [ 3.0,   0.0, 0.28]
 vp.CameraViewUp        = [0, 0, 1]
-vp.CameraParallelScale = 0.60   # wider than before
+vp.CameraParallelScale = 0.85
 
 side_txt = Text(); side_txt.Text = 'SIDE VIEW  (port)'
 sDsp = Show(side_txt); sDsp.FontSize = 20; sDsp.Bold = 1
