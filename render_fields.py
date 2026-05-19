@@ -97,12 +97,12 @@ Render()
 save(f'{CASE}/hull_pressure_iso.png', 1400, 700)
 Hide(bow_txt); Delete(bow_txt)
 
-# Side view: looking along +y (port side), x horizontal, z vertical
-vp.ViewSize           = [1400, 500]
-vp.CameraPosition     = [ 3.0, -10.0, 0.28]
-vp.CameraFocalPoint   = [ 3.0,   0.0, 0.28]
-vp.CameraViewUp       = [0, 0, 1]
-vp.CameraParallelScale = 0.40
+# Side view: zoomed out to show full hull length
+vp.ViewSize            = [1400, 500]
+vp.CameraPosition      = [ 3.0, -10.0, 0.28]
+vp.CameraFocalPoint    = [ 3.0,   0.0, 0.28]
+vp.CameraViewUp        = [0, 0, 1]
+vp.CameraParallelScale = 0.60   # wider than before
 
 side_txt = Text(); side_txt.Text = 'SIDE VIEW  (port)'
 sDsp = Show(side_txt); sDsp.FontSize = 20; sDsp.Bold = 1
@@ -114,22 +114,30 @@ Render()
 save(f'{CASE}/hull_pressure_side.png', 1400, 500)
 Hide(side_txt); Delete(side_txt)
 
-# Bow-on view: looking from +x toward stern, y horizontal, z vertical
-vp.ViewSize            = [700, 700]
-vp.CameraPosition      = [10.0, -0.2, 0.28]
-vp.CameraFocalPoint    = [ 3.0, -0.2, 0.28]
-vp.CameraViewUp        = [0, 0, 1]
-vp.CameraParallelScale = 0.40
+# Bow-on view: mirror hull across y=0 to show full ship width
+hull_mirror  = Reflect(Input=hull_p)
+hull_mirror.Plane = 'Y Min'   # reflect across y=0 plane
+hull_mirror.UpdatePipeline()
+mirrorDsp = Show(hull_mirror)
+ColorBy(mirrorDsp, ('POINTS', 'p'))
+mirrorDsp.LookupTable = lut_p
 
-bow2_txt = Text(); bow2_txt.Text = 'BOW-ON VIEW'
+vp.ViewSize            = [900, 700]
+vp.CameraPosition      = [10.0,  0.0, 0.28]
+vp.CameraFocalPoint    = [ 3.0,  0.0, 0.28]
+vp.CameraViewUp        = [0, 0, 1]
+vp.CameraParallelScale = 0.50
+
+bow2_txt = Text(); bow2_txt.Text = 'BOW-ON VIEW  (full ship mirrored)'
 b2Dsp = Show(bow2_txt); b2Dsp.FontSize = 20; b2Dsp.Bold = 1
 b2Dsp.Color = [0,0,0]; b2Dsp.WindowLocation = 'Upper Left Corner'
 
 hide_all_colorbars()
 cb_p.Visibility = 1
 Render()
-save(f'{CASE}/hull_pressure_bow.png', 700, 700)
+save(f'{CASE}/hull_pressure_bow.png', 900, 700)
 Hide(bow2_txt); Delete(bow2_txt)
+Hide(mirrorDsp); Delete(hull_mirror)
 
 Delete(hull_p); del hull_p
 
