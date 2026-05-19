@@ -86,10 +86,10 @@ The solution settles by t ≈ 2–3 s. After that, small oscillations remain due
 
 ### Wave Pattern Evolution
 
-**Free-surface elevation (top-down view) from t = 1–6 s:**
+**Free surface (α = 0.5 isosurface) coloured by p_rgh, side view, t = 1–6 s:**
 ![Wave animation](wave_animation.gif)
 
-The bow wave builds during the first ~2 s as the flow establishes; by t ≈ 3 s the Kelvin wake is stationary. The characteristic diverging and transverse wave system is visible aft of the hull.
+The bow wave builds during the first ~2 s; by t ≈ 3 s the wave pattern is stationary. The wave crests and troughs along the hull are visible as high- and low-pressure zones on the free surface.
 
 ### Wave Pattern — Symmetry Plane (y = 0)
 
@@ -98,12 +98,6 @@ The bow wave builds during the first ~2 s as the flow establishes; by t ≈ 3 s 
 
 The free surface is clearly visible as the sharp blue-to-red transition. Bow and stern wave crests ride above the undisturbed waterline; the Kelvin trough is visible along the hull side.
 
-### Hull Surface Pressure
-
-**Pressure distribution on the hull surface (side view, t = 5 s):**
-![Hull pressure](hull_pressure.png)
-
-High pressure at the bow stagnation point drives the wave-making resistance; the negative pressure region along the midbody and stern contributes to form drag.
 
 ---
 
