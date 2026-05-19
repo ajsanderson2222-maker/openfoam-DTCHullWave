@@ -1,6 +1,6 @@
 # DTCHullWave — OpenFOAM 13 Ship Wave Resistance
 
-Simulation of the **DTC (Duisburg Test Case) container ship** advancing through calm water using the `interFoam` solver. The hull undergoes free heave and pitch (2-DOF rigid-body motion). Wave resistance and rigid-body dynamics are computed from a Reynolds-Averaged simulation with a VOF free surface.
+Simulation of the **DTC (Duisburg Test Case) container ship** advancing through head seas using the `interFoam` solver. The hull undergoes free heave and pitch via a 2-DOF rigid-body motion model. Wave resistance, dynamic trim, and the Kelvin wake pattern are computed from a Reynolds-Averaged Navier-Stokes simulation with a VOF free surface.
 
 ---
 
@@ -8,17 +8,16 @@ Simulation of the **DTC (Duisburg Test Case) container ship** advancing through 
 
 | Parameter | Value |
 |---|---|
-| Hull | DTC container ship (model scale) |
+| Hull | DTC container ship (Lpp = 5.72 m, model scale) |
 | Ship speed U | 1.668 m/s |
 | Froude number Fr | 0.223 |
 | Reynolds number Re | 8.75 × 10⁶ |
 | Water density ρ | 998.8 kg/m³ |
 | Kinematic viscosity ν | 1.09 × 10⁻⁶ m²/s |
 | Incident waves | Stokes 2nd order, λ = 3 m, a = 0.04 m |
-| Wave direction | Head seas (into bow) |
-| DOF | Free heave + pitch (Euler-implicit rigid-body motion) |
-
-The simulation uses a half-domain with a symmetry plane at y = 0 (port–starboard symmetry).
+| Wave direction | Head seas (opposing bow) |
+| Degrees of freedom | Heave + pitch (2-DOF Euler-implicit rigid body) |
+| Domain | Half-ship with symmetry plane at y = 0 |
 
 ---
 
@@ -27,12 +26,11 @@ The simulation uses a half-domain with a symmetry plane at y = 0 (port–starboa
 | Parameter | Value |
 |---|---|
 | Total cells | ~960,000 |
-| Base mesh | blockMesh hexahedral background |
-| Hull refinement | snappyHexMesh surface + boundary layers |
-| Free-surface refinement | Refined band around z ≈ 0 waterline |
-| Boundary layers | 3 layers on hull surface |
+| Base mesh | Hexahedral blockMesh background |
+| Hull surface | snappyHexMesh with 3 boundary layers |
+| Free-surface band | Locally refined around z ≈ 0 waterline |
 
-The mesh was generated with `blockMesh` → `surfaceFeatures` → `snappyHexMesh` → `refineMesh` → `renumberMesh`.
+Generated with: `blockMesh` → `surfaceFeatures` → `snappyHexMesh` → `refineMesh` → `renumberMesh`
 
 ---
 
@@ -40,15 +38,15 @@ The mesh was generated with `blockMesh` → `surfaceFeatures` → `snappyHexMesh
 
 ### Free Surface — Volume of Fluid (VOF)
 
-`alpha.water` transports the water volume fraction. MULES compression keeps the interface sharp. Air above and water below are treated as incompressible Newtonian fluids.
+`alpha.water` transports the water volume fraction. MULES flux compression keeps the air–water interface sharp. Both phases are treated as incompressible Newtonian fluids.
 
 ### Turbulence
 
-k–ω SST (incompressible) for the water phase.
+k–ω SST for the water phase; zero-equation model for air.
 
 ### Rigid-Body Motion
 
-The hull is free to heave (z) and pitch (rotation about y). The `rigidBodyMotion` dynamic mesh solver moves the hull each time step, and the mesh deforms accordingly. Forces and moments are written to `postProcessing/rigidBodyForces/`.
+The hull heaves freely in z and pitches about y at each time step. The `rigidBodyMotion` dynamic mesh solver deforms the surrounding mesh accordingly. Forces, moments, and centre-of-rotation are written to `postProcessing/rigidBodyForces/` every time step.
 
 ---
 
@@ -58,9 +56,9 @@ The hull is free to heave (z) and pitch (rotation about y). The `rigidBodyMotion
 |---|---|
 | Solver | `interFoam` |
 | Time discretisation | Euler implicit |
-| Pressure–velocity | PIMPLE (3 outer iterations) |
-| Simulated time | 6.54 s (killed; t = 20 s target) |
-| Time step | Adaptive (Co < 0.5) |
+| Pressure–velocity coupling | PIMPLE (3 outer iterations) |
+| Courant number limit | Co < 0.5 (adaptive dt) |
+| Simulated time | 6.54 s |
 
 ---
 
@@ -74,22 +72,27 @@ The hull is free to heave (z) and pitch (rotation about y). The `rigidBodyMotion
 | Quantity | Value |
 |---|---|
 | Mean total resistance (t > 4 s) | **22.0 N** |
-| Pressure component | 8.5 N (39%) |
-| Viscous component | 13.5 N (61%) |
+| Pressure (wave-making) component | 8.5 N (39%) |
+| Viscous (friction) component | 13.5 N (61%) |
 
-The solution settles by t ≈ 2–3 s. After that, small oscillations remain due to the Stokes wave field interacting with the hull and causing periodic heave/pitch excitation. The viscous component dominates at this relatively low Froude number (Fr = 0.223), consistent with the sub-critical hull speed where wave-making resistance is modest.
+The solution settles by t ≈ 2–3 s. Residual oscillations after that are driven by the periodic Stokes wave field exciting heave and pitch. The viscous component dominates at Fr = 0.223 — the hull is running well below its hull speed, so wave-making resistance is modest and skin friction is the primary contributor.
 
 ### Convergence
 
 **Solver residuals for p_rgh, α_water, and Ux:**
 ![Convergence](convergence.png)
 
-### Wave Pattern Evolution
+### Wave Pattern
 
-**Free surface (α = 0.5 isosurface) coloured by p_rgh, side view, t = 1–6 s:**
+**Free-surface elevation (α = 0.5 isosurface, coloured by elevation) at t = 1–6 s:**
 ![Wave animation](wave_animation.gif)
 
-The bow wave builds during the first ~2 s; by t ≈ 3 s the wave pattern is stationary. The wave crests and troughs along the hull are visible as high- and low-pressure zones on the free surface.
+The bow wave establishes within the first ~2 s. By t ≈ 3 s the Kelvin wake pattern is stationary — the diverging bow waves and transverse stern waves are clearly visible alongside the hull.
+
+**Water volume fraction on the centreline symmetry plane (t = 5 s):**
+![Wave pattern midplane](wave_pattern_midplane.png)
+
+The sharp blue-to-red transition marks the free surface. Bow and stern wave crests stand above the undisturbed waterline; the Kelvin trough runs along the hull midbody.
 
 ### Hull Surface Pressure
 
@@ -99,18 +102,10 @@ The bow wave builds during the first ~2 s; by t ≈ 3 s the wave pattern is stat
 **Port side view:**
 ![Hull pressure side](hull_pressure_side.png)
 
-**Bow-on view:**
+**Bow-on view (full ship, mirrored across symmetry plane):**
 ![Hull pressure bow](hull_pressure_bow.png)
 
-High pressure at the bow stagnation point drives wave-making resistance; low pressure along the midbody and stern contributes to form drag. The viscous component (61% of total) dominates at Fr = 0.223.
-
-### Wave Pattern — Symmetry Plane (y = 0)
-
-**Water volume fraction α on the centreline x–z plane at t = 5 s:**
-![Wave pattern](wave_pattern_midplane.png)
-
-The free surface is clearly visible as the sharp blue-to-red transition. Bow and stern wave crests ride above the undisturbed waterline; the Kelvin trough is visible along the hull side.
-
+The bow stagnation zone (red, ~2500 Pa) is the dominant source of wave-making resistance. Pressure drops sharply to near-ambient along the midbody and stern. The bow-on view shows the pressure is symmetric across the centreline and highest at the keel waterline where the hull is fullest.
 
 ---
 
@@ -119,11 +114,11 @@ The free surface is clearly visible as the sharp blue-to-red transition. Bow and
 ```bash
 source /opt/openfoam13/etc/bashrc
 cd openfoam-DTCHullWave
-./Allmesh               # blockMesh + snappyHexMesh + refineMesh + setWaves
+./Allmesh                  # blockMesh + snappyHexMesh + refineMesh + setWaves
 decomposePar
 mpirun -np 8 foamRun -parallel > log.foamRun 2>&1 &
 reconstructPar
-python3 post_process.py                        # resistance history, convergence
+python3 post_process.py    # resistance history + convergence plots
 PYTHONPATH=/usr/lib/python3/dist-packages pvpython render_fields.py  # field images + GIF
 ```
 
