@@ -93,13 +93,10 @@ The bow wave builds during the first ~2 s as the flow establishes; by t ≈ 3 s 
 
 ### Wave Pattern — Symmetry Plane (y = 0)
 
-**Water volume fraction and pressure at t = 5 s (zoomed around hull):**
-![Wave pattern](wave_pattern.png)
+**Water volume fraction α on the centreline x–z plane at t = 5 s:**
+![Wave pattern](wave_pattern_midplane.png)
 
-**Full-domain wave pattern:**
-![Wave pattern full](wave_pattern_full.png)
-
-The free surface (α = 0.5 contour, black line) shows the characteristic bow wave building up ahead of the hull and the Kelvin wake developing downstream. The pressure field reflects the high-pressure stagnation zone at the bow and the low-pressure trough along the hull waterline.
+The free surface is clearly visible as the sharp blue-to-red transition. Bow and stern wave crests ride above the undisturbed waterline; the Kelvin trough is visible along the hull side.
 
 ### Hull Surface Pressure
 
@@ -119,7 +116,8 @@ cd openfoam-DTCHullWave
 decomposePar
 mpirun -np 8 foamRun -parallel > log.foamRun 2>&1 &
 reconstructPar
-python3 post_process.py
+python3 post_process.py                        # resistance history, convergence
+PYTHONPATH=/usr/lib/python3/dist-packages pvpython render_fields.py  # field images + GIF
 ```
 
 ---
