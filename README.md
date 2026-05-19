@@ -77,6 +77,13 @@ The hull heaves freely in z and pitches about y at each time step. The `rigidBod
 
 The solution settles by t ≈ 2–3 s. Residual oscillations after that are driven by the periodic Stokes wave field exciting heave and pitch. The viscous component dominates at Fr = 0.223 — the hull is running well below its hull speed, so wave-making resistance is modest and skin friction is the primary contributor.
 
+### Ship Loads vs Time
+
+**Resistance (Fx), vertical force (Fz), and pitch moment (My) vs time:**
+![Ship loads](ship_loads.png)
+
+All three loads settle by t ≈ 2–3 s. The vertical force Fz reflects the net hydrodynamic sinkage force as the hull trims to its dynamic running attitude; the pitch moment My shows the bow-down trimming moment driven by the high bow stagnation pressure. Oscillations after settling are the periodic wave excitation from the Stokes incident wave field.
+
 ### Convergence
 
 **Solver residuals for p_rgh, α_water, and Ux:**
