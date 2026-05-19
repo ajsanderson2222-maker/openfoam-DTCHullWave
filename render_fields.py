@@ -7,21 +7,17 @@ CASE    = os.path.dirname(os.path.abspath(__file__))
 VTK_DIR = f'{CASE}/VTK'
 SURF    = f'{CASE}/postProcessing/surfaces'
 
-VIEW_W, VIEW_H = 1400, 500
+def hide_all_colorbars():
+    """Hide every scalar bar in the active view before rendering."""
+    v = GetRenderView()
+    for rep in GetRepresentations():
+        try:
+            rep.SetScalarBarVisibility(v, False)
+        except Exception:
+            pass
 
-# Exact camera matching the midplane image: side view along -y, x-z plane
-def apply_camera(v):
-    v.CameraPosition           = [2.0, -60.0, 0.2]
-    v.CameraFocalPoint         = [2.0,   0.0, 0.2]
-    v.CameraViewUp             = [0, 0, 1]
-    v.CameraParallelProjection = 1
-    v.CameraParallelScale      = 3.0
-    v.ViewSize                 = [VIEW_W, VIEW_H]
-    v.Background               = [1, 1, 1]
-    v.OrientationAxesVisibility = 0
-
-def save(path):
-    SaveScreenshot(path, GetRenderView(), ImageResolution=[VIEW_W, VIEW_H])
+def save(path, w=1400, h=500):
+    SaveScreenshot(path, GetRenderView(), ImageResolution=[w, h])
     print(f'saved: {path}')
 
 # ── 1. Midplane α.water at t = 5 s ───────────────────────────────────────────
@@ -36,46 +32,28 @@ lut_a.RescaleTransferFunction(0.0, 1.0)
 cb_a = GetScalarBar(lut_a, GetRenderView())
 cb_a.Title = 'alpha.water'
 cb_a.ComponentTitle = ''
-cb_a.Visibility = 1
+cb_a.Orientation = 'Horizontal'
+cb_a.WindowLocation = 'Lower Center'
 
 v = GetRenderView()
-apply_camera(v)
+v.ViewSize                  = [1400, 500]
+v.Background                = [1, 1, 1]
+v.OrientationAxesVisibility = 0
+v.CameraPosition            = [2.0, -60.0, 0.2]
+v.CameraFocalPoint          = [2.0,   0.0, 0.2]
+v.CameraViewUp              = [0, 0, 1]
+v.CameraParallelProjection  = 1
+v.CameraParallelScale       = 3.0
+
+hide_all_colorbars()
+cb_a.Visibility = 1
 Render()
-save(f'{CASE}/wave_pattern_midplane.png')
-cb_a.Visibility = 0   # hide alpha colorbar before GIF frames
+save(f'{CASE}/wave_pattern_midplane.png', 1400, 500)
 Delete(mid); del mid
 
-# ── 2. GIF: interface side view t = 1–6 s ─────────────────────────────────────
-# Use a Calculator to expose z as a scalar field so we can colour by
-# wave elevation — same visual idea as the alpha midplane image.
-
-gif_times = list(range(1, 7))
-
-# Pass 1: find global z range across all frames for a fixed colour scale
-z_lo, z_hi = 1e9, -1e9
-for t in gif_times:
-    src = LegacyVTKReader(FileNames=[f'{SURF}/{t}/interface.vtk'])
-    src.UpdatePipeline()
-    b = src.GetDataInformation().GetBounds()  # xmin xmax ymin ymax zmin zmax
-    z_lo = min(z_lo, b[4])
-    z_hi = max(z_hi, b[5])
-    Delete(src)
-
-# Set up LUT once — reused for every frame
-lut_z = GetColorTransferFunction('z_elevation')
-lut_z.ApplyPreset('Cool to Warm', True)
-lut_z.RescaleTransferFunction(z_lo, z_hi)
-
-cb_z = GetScalarBar(lut_z, GetRenderView())
-cb_z.Title = 'Free surface elevation [m]'
-cb_z.ComponentTitle = ''
-cb_z.Orientation = 'Horizontal'
-cb_z.WindowLocation = 'Lower Center'
-cb_z.Visibility = 1
-
-# ── 2. Hull surface pressure contours ────────────────────────────────────────
-hull_p    = LegacyVTKReader(FileNames=[f'{VTK_DIR}/hull/hull_2518.vtk'])
-hullpDsp  = Show(hull_p)
+# ── 2. Hull surface pressure — isometric view ─────────────────────────────────
+hull_p   = LegacyVTKReader(FileNames=[f'{VTK_DIR}/hull/hull_2518.vtk'])
+hullpDsp = Show(hull_p)
 ColorBy(hullpDsp, ('POINTS', 'p'))
 
 lut_p = GetColorTransferFunction('p')
@@ -87,59 +65,89 @@ cb_p.Title = 'Pressure [Pa]'
 cb_p.ComponentTitle = ''
 cb_p.Orientation = 'Horizontal'
 cb_p.WindowLocation = 'Lower Center'
-cb_p.Visibility = 1
 
-# Isometric view: equal foreshortening from above-port-bow
-# Hull centre ~(3.0, -0.2, 0.28); pull camera along (−1,−1,1) diagonal
 vp = GetRenderView()
 vp.ViewSize                  = [1400, 600]
 vp.Background                = [1, 1, 1]
 vp.OrientationAxesVisibility = 0
-vp.CameraParallelProjection  = 1   # true iso (no perspective distortion)
+vp.CameraParallelProjection  = 1
 vp.CameraPosition            = [-2.0, -3.5, 2.5]
 vp.CameraFocalPoint          = [ 3.0, -0.2, 0.28]
 vp.CameraViewUp              = [0, 0, 1]
 vp.CameraParallelScale       = 1.0
-Render()
-save(f'{CASE}/hull_pressure.png')
 
-cb_p.Visibility = 0
+hide_all_colorbars()
+cb_p.Visibility = 1
+Render()
+save(f'{CASE}/hull_pressure.png', 1400, 600)
 Delete(hull_p); del hull_p
 
-# Load hull once — kept visible in every frame as a solid grey surface
+# ── 3. GIF: interface side view t = 1–6 ──────────────────────────────────────
+gif_times = list(range(1, 7))
+
+# Global z range for consistent colour scale across frames
+z_lo, z_hi = 1e9, -1e9
+for t in gif_times:
+    src = LegacyVTKReader(FileNames=[f'{SURF}/{t}/interface.vtk'])
+    src.UpdatePipeline()
+    b = src.GetDataInformation().GetBounds()
+    z_lo = min(z_lo, b[4])
+    z_hi = max(z_hi, b[5])
+    Delete(src)
+
+lut_z = GetColorTransferFunction('z_elevation')
+lut_z.ApplyPreset('Cool to Warm', True)
+lut_z.RescaleTransferFunction(z_lo, z_hi)
+
+cb_z = GetScalarBar(lut_z, GetRenderView())
+cb_z.Title = 'Free surface elevation [m]'
+cb_z.ComponentTitle = ''
+cb_z.Orientation = 'Horizontal'
+cb_z.WindowLocation = 'Lower Center'
+
+# Hull shown as solid grey throughout GIF
 hull    = LegacyVTKReader(FileNames=[f'{VTK_DIR}/hull/hull_2518.vtk'])
 hullDsp = Show(hull)
-hullDsp.AmbientColor  = [0.3, 0.3, 0.3]
-hullDsp.DiffuseColor  = [0.3, 0.3, 0.3]
-hullDsp.Opacity       = 1.0
-hullDsp.ColorArrayName = ['POINTS', '']   # solid colour, no scalar
+hullDsp.AmbientColor   = [0.35, 0.35, 0.35]
+hullDsp.DiffuseColor   = [0.35, 0.35, 0.35]
+hullDsp.ColorArrayName = ['POINTS', '']
 
 frames = []
 for t in gif_times:
     src  = LegacyVTKReader(FileNames=[f'{SURF}/{t}/interface.vtk'])
     calc = Calculator(Input=src)
     calc.ResultArrayName = 'z_elevation'
-    calc.Function = 'coordsZ'
+    calc.Function        = 'coordsZ'
     calc.UpdatePipeline()
 
     dsp = Show(calc)
     ColorBy(dsp, ('POINTS', 'z_elevation'))
     dsp.LookupTable = lut_z
-    cb_z.Visibility = 1
 
     txt = Text()
     txt.Text = f't = {t} s'
     tDsp = Show(txt)
-    tDsp.FontSize = 24
-    tDsp.Bold = 1
-    tDsp.Color = [0, 0, 0]
+    tDsp.FontSize       = 24
+    tDsp.Bold           = 1
+    tDsp.Color          = [0, 0, 0]
     tDsp.WindowLocation = 'Upper Right Corner'
 
-    apply_camera(GetRenderView())
+    gv = GetRenderView()
+    gv.ViewSize                  = [1400, 500]
+    gv.Background                = [1, 1, 1]
+    gv.OrientationAxesVisibility = 0
+    gv.CameraPosition            = [2.0, -60.0, 0.2]
+    gv.CameraFocalPoint          = [2.0,   0.0, 0.2]
+    gv.CameraViewUp              = [0, 0, 1]
+    gv.CameraParallelProjection  = 1
+    gv.CameraParallelScale       = 3.0
+
+    hide_all_colorbars()
+    cb_z.Visibility = 1
     Render()
 
     tmp = f'{CASE}/_frame_{t}.png'
-    save(tmp)
+    save(tmp, 1400, 500)
     frames.append(Image.open(tmp).copy())
 
     Hide(calc); Delete(calc); Delete(src)
